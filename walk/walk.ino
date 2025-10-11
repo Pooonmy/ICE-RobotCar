@@ -5,12 +5,12 @@ UTFT tft(ST7735, 6, 7, 3, 4, 5);
 #define White VGA_WHITE
 #define Black VGA_BLACK
 
-#define enA 11
-#define inA 12
-#define inB 13
-#define enB 10
-#define inC 8
-#define inD 9
+#define enA 10
+#define inA 8
+#define inB 9
+#define enB 11
+#define inC 12
+#define inD 13
 
 #define walk_speed 100
 #define tilt_speed 80
