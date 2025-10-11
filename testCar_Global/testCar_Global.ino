@@ -5,16 +5,16 @@ UTFT tft(ST7735, 6, 7, 3, 4, 5);
 #define White VGA_WHITE
 #define Black VGA_BLACK
 
-#define enA 11
-#define inA 12
-#define inB 13
-#define enB 10
-#define inC 8
-#define inD 9
+#define enA 10
+#define inA 8
+#define inB 9
+#define enB 11
+#define inC 12
+#define inD 13
 
 #define walk_speed 100
-#define tilt_speed 80
-#define threshold 400
+#define tilt_speed 100
+#define threshold 300
 
 #define btnPin 0
 #define buzzPin 19
@@ -68,48 +68,53 @@ void setup() {
 
   beep(0);
   tft.clrScr();
-  tft.print("Running :3", CENTER, 56);
+  // tft.print("Running :3", CENTER, 56);
 }
 
 void loop() {
 
-  if (digitalRead(btnPin) == LOW) {
-    stop();
-    beep(0);
-    tft.clrScr();
-    tft.print("Reset to continue", CENTER, 56);
-    while (true)
-      ;
-  }
-
+  // if (digitalRead(btnPin) == LOW) {
+  //   stop();
+  //   beep(0);
+  //   tft.clrScr();
+  //   tft.print("Reset to continue", CENTER, 56);
+  // }
   readUltrasonic();
   readIR();
   // display_ir();
 
   while (isWhite(ir.rr) && isWhite(ir.ll)) {
+    delay(50);
     readIR();
     // display_ir();
     // Serial.println("Here");
-    if (digitalRead(btnPin) == LOW) {
-      beep(0);
-      stop();
-      tft.clrScr();
-      tft.print("Reset to continue", CENTER, 56);
-      while (true)
-        ;
-    }
+    // if (digitalRead(btnPin) == LOW) {
+    //   beep(0);
+    //   stop();
+    //   tft.clrScr();
+    //   tft.print("Reset to continue", CENTER, 56);
+    //   while (true)
+    //     ;
+    // }
 
     if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
       walk_straight();
     } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
-      tilt_right();
-    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
       tilt_left();
+    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
+      tilt_right();
+    }
   }
+  // stop();
+  turn_left();
+ 
+
+
   // stop();
   // delay(500);
 }
-}
+
+
 
 void log(void) {
 
@@ -131,9 +136,9 @@ int isWhite(int read) {
 }
 
 void tilt_left() {
-  analogWrite(enA, tilt_speed);
+  analogWrite(enA, 0);
   digitalWrite(inA, LOW);
-  digitalWrite(inB, HIGH);
+  digitalWrite(inB, LOW);
 
   analogWrite(enB, tilt_speed);
   digitalWrite(inC, HIGH);
@@ -146,9 +151,9 @@ void tilt_right() {
   digitalWrite(inA, HIGH);
   digitalWrite(inB, LOW);
 
-  analogWrite(enB, tilt_speed);
+  analogWrite(enB, 0);
   digitalWrite(inC, LOW);
-  digitalWrite(inD, HIGH);
+  digitalWrite(inD, LOW);
 }
 
 void walk_straight() {
@@ -172,50 +177,67 @@ void stop() {
 }
 
 void turn_left() {
+  static unsigned long timestamp = millis();
 
+  // if ((millis() - timestamp) < 100) {
+  //   walk_straight();
+  // }
+  // walk_straight();
+  // delay(200);
   readIR();
-  while (isWhite(ir.rr) && isWhite(ir.ll)) {
-    readIR();
-    walk_straight();
-  }
+  // while (!isWhite(ir.rr) && !isWhite(ir.ll)) {
+  //   readIR();
+  //   if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
+  //     walk_straight();
+  //   } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
+  //     tilt_left();
+  //   } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
+  //     tilt_right();
+  //   }
+  // }
 
   while (!isWhite(ir.cl) && !isWhite(ir.cr)) {
     readIR();
     //tilt left untill all white
-    analogWrite(enA, tilt_speed);
-    digitalWrite(inA, LOW);
-    digitalWrite(inB, HIGH);
-
-    analogWrite(enB, tilt_speed);
-    digitalWrite(inC, HIGH);
-    digitalWrite(inD, LOW);
+    tilt_left();
   }
   while (isWhite(ir.cl) && isWhite(ir.cr)) {
     readIR();
     //tilt left untill all black
-    analogWrite(enA, tilt_speed);
-    digitalWrite(inA, LOW);
-    digitalWrite(inB, HIGH);
-
-    analogWrite(enB, tilt_speed);
-    digitalWrite(inC, HIGH);
-    digitalWrite(inD, LOW);
-    if (!isWhite(ir.cl) && !isWhite(ir.cr)) {
-      readIR();
-      return (0);
-    }
+    tilt_left();
   }
 }
 
 void turn_right() {
-  analogWrite(enA, 100);
-  digitalWrite(inA, HIGH);
-  digitalWrite(inB, LOW);
+  static unsigned long timestamp = millis();
 
-  analogWrite(enB, 0);
-  digitalWrite(inC, LOW);
-  digitalWrite(inD, LOW);
-  delay(100);
+  // if ((millis() - timestamp) < 100) {
+  //   walk_straight();
+  // }
+  // walk_straight();
+  // delay(200);
+  readIR();
+  // while (!isWhite(ir.rr) && !isWhite(ir.ll)) {
+  //   readIR();
+  //   if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
+  //     walk_straight();
+  //   } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
+  //     tilt_left();
+  //   } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
+  //     tilt_right();
+  //   }
+  // }
+
+  while (!isWhite(ir.cl) && !isWhite(ir.cr)) {
+    readIR();
+    //tilt left untill all white
+    tilt_right();
+  }
+  while (isWhite(ir.cl) && isWhite(ir.cr)) {
+    readIR();
+    //tilt left untill all black
+    tilt_right();
+  }
 }
 
 void readUltrasonic() {
@@ -256,7 +278,7 @@ void beep(int count) {
 }
 
 void display_ir() {
-  ir_s ir;
+
 
   readIR();
   tft.setColor(White);
