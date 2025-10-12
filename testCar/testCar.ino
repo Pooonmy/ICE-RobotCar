@@ -75,31 +75,50 @@ void setup() {
   beep(0);
   tft.clrScr();
   // tft.print("Running :3", CENTER, 56);
+
+  //
+  readUltrasonic();
+  readIR();
+  // display_ir();
+  delay(1500);
+  beep(2);
+  follow_line_full();
+  follow_line_full();
+  follow_line_full();
+  // turn_right();
+  // follow_line_full();
+  // follow_line_full();
+  // follow_line_full();
+  // turn_left();
+  // follow_line_full();
+  // follow_line_full();
+  // turn_right();
+  // follow_line_full();
+  // turn_left();
+  // follow_line_full();
+  // follow_line_full();
+  // turn_right();
+  // follow_line_full();
+  beep(2);
+  
+
+  readIR();
 }
 
 void loop() {
 
 
-  readUltrasonic();
-  readIR();
-  // display_ir();
+  // readUltrasonic();
+  // readIR();
+  // // display_ir();
 
 
-  // 1. Follow line until intersection (same condition as before)
-  follow_line();
-  // walk_straight();
-  // 2. Small pause to stabilize before turning
-  // stop();
-  // delay(100);
-  turn_right();
+  // follow_line_full();
+  // turn_right();
+  // follow_line_full();
+  // turn_left();
 
-  // 3. Alternate left/right turn
-  // if (count % 2 != 0) {
-  //   turn_right();
-  // } else {
-  //   turn_left();
-  // }
-  // count++;
+  // readIR();
 }
 
 
@@ -124,7 +143,7 @@ int isWhite(int read) {
 }
 
 void follow_line() {
-  while (isWhite(ir.rr) && isWhite(ir.ll)) {  // <-- same logic as before
+  while (isWhite(ir.rr) && isWhite(ir.ll)) {
     delay(20);
     readIR();
 
@@ -134,12 +153,23 @@ void follow_line() {
       tilt_left();
     } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
       tilt_right();
-    } else {
-      // If all sensors white (maybe gap), keep last direction or slow stop
-      walk_straight();
     }
+    readIR();
   }
-  stop();
+  readIR();
+  walk_straight();
+  delay(200);
+  readIR();
+  stop(500);
+  readIR();
+}
+
+void follow_line_full() {
+  follow_line();
+  readIR();
+  beep(1);
+  stop(700);
+  readIR();
 }
 
 void tilt_left() {
@@ -173,7 +203,8 @@ void walk_straight() {
   digitalWrite(inD, LOW);
 }
 
-void stop() {
+void stop(int time) {
+  readIR();
   analogWrite(enA, 0);
   digitalWrite(inA, LOW);
   digitalWrite(inB, LOW);
@@ -181,15 +212,20 @@ void stop() {
   analogWrite(enB, 0);
   digitalWrite(inC, LOW);
   digitalWrite(inD, LOW);
+  readIR();
+  delay(time);
+  readIR();
 }
 
 void turn_left() {
 
   readIR();
   walk_straight();
-  delay(100);
+  delay(400);
+  readIR();
+  stop(500);
 
-  while (!isWhite(ir.cl) && !isWhite(ir.cr)) {
+  while (!isWhite(ir.cl) || !isWhite(ir.cr)) {
     readIR();
     //tilt left untill all white
     analogWrite(enA, turn_speed);
@@ -200,7 +236,7 @@ void turn_left() {
     digitalWrite(inC, HIGH);
     digitalWrite(inD, LOW);
   }
-  while (isWhite(ir.cl) && isWhite(ir.cr)) {
+  while (isWhite(ir.cl) || isWhite(ir.cr)) {
     readIR();
     //tilt left untill all black
     analogWrite(enA, turn_speed);
@@ -211,34 +247,20 @@ void turn_left() {
     digitalWrite(inC, HIGH);
     digitalWrite(inD, LOW);
   }
+  
+  readIR();
 }
 
 void turn_right() {
 
   readIR();
-  // walk_straight();
-  // delay(150);
-  while (!isWhite(ir.rr) && !isWhite(ir.ll)) {
-    delay(20);
-    readIR();
-
-    if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
-      walk_straight();
-    } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
-      tilt_left();
-    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
-      tilt_right();
-    } else {
-      // If all sensors white (maybe gap), keep last direction or slow stop
-      walk_straight();
-    }
-  }
-  
-
+  walk_straight();
+  delay(400);
+  stop(500);
 
   readIR();
 
-  while (!isWhite(ir.cl) && !isWhite(ir.cr)) {
+  while (!isWhite(ir.cl) || !isWhite(ir.cr)) {
     readIR();
     //tilt left untill all white
     analogWrite(enA, turn_speed);
@@ -249,7 +271,7 @@ void turn_right() {
     digitalWrite(inC, LOW);
     digitalWrite(inD, HIGH);
   }
-  while (isWhite(ir.cl) && isWhite(ir.cr)) {
+  while (isWhite(ir.cl) || isWhite(ir.cr)) {
     readIR();
     //tilt left untill all black
     analogWrite(enA, turn_speed);
@@ -260,6 +282,8 @@ void turn_right() {
     digitalWrite(inC, LOW);
     digitalWrite(inD, HIGH);
   }
+  
+  readIR();
 }
 
 void readUltrasonic() {
@@ -293,9 +317,9 @@ void readIR() {
 void beep(int count) {
   for (int i = 0; i < count; i++) {
     digitalWrite(buzzPin, LOW);
-    delay(50);
+    delay(200);
     digitalWrite(buzzPin, HIGH);
-    delay(50);
+    delay(200);
   }
 }
 
