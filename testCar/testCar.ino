@@ -15,9 +15,9 @@ UTFT tft(ST7735, 6, 7, 3, 4, 5);
 #define walk_speed 100
 #define tilt_speed 80
 #define turn_speed 80
-#define walk_speed_enB 140
-#define tilt_speed_enB 120
-#define turn_speed_enB 120
+#define walk_speed_enB 160
+#define tilt_speed_enB 140
+#define turn_speed_enB 140
 #define threshold 400
 
 #define btnPin 0
@@ -44,7 +44,7 @@ typedef struct s_ir {
 ir_s ir;
 
 long duration;
-int distance;
+int distance = 0;
 
 int count = 1;
 
@@ -85,32 +85,21 @@ void loop() {
   // display_ir();
 
 
-  while (isWhite(ir.rr) && isWhite(ir.ll)) {
-    delay(20);
-    readIR();
+  // 1. Follow line until intersection (same condition as before)
+  follow_line();
+  // walk_straight();
+  // 2. Small pause to stabilize before turning
+  // stop();
+  // delay(100);
+  turn_right();
 
-    if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
-      walk_straight();
-    } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
-      tilt_left();
-    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
-      tilt_right();
-    }
-  }
-  readIR();
-  // delay(20);
-  // turn_right();
-  if (count % 2 != 0) {
-    readIR();
-    turn_right();
-  } else {
-    readIR();
-    turn_left();
-  }
-  count++;
-
-
-  readIR();
+  // 3. Alternate left/right turn
+  // if (count % 2 != 0) {
+  //   turn_right();
+  // } else {
+  //   turn_left();
+  // }
+  // count++;
 }
 
 
@@ -135,8 +124,8 @@ int isWhite(int read) {
 }
 
 void follow_line() {
-  while (isWhite(ir.rr) && isWhite(ir.ll)) {
-    delay(50);
+  while (isWhite(ir.rr) && isWhite(ir.ll)) {  // <-- same logic as before
+    delay(20);
     readIR();
 
     if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
@@ -145,8 +134,12 @@ void follow_line() {
       tilt_left();
     } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
       tilt_right();
+    } else {
+      // If all sensors white (maybe gap), keep last direction or slow stop
+      walk_straight();
     }
   }
+  stop();
 }
 
 void tilt_left() {
@@ -223,8 +216,27 @@ void turn_left() {
 void turn_right() {
 
   readIR();
-  walk_straight();
-  delay(100);
+  // walk_straight();
+  // delay(150);
+  while (!isWhite(ir.rr) && !isWhite(ir.ll)) {
+    delay(20);
+    readIR();
+
+    if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
+      walk_straight();
+    } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
+      tilt_left();
+    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
+      tilt_right();
+    } else {
+      // If all sensors white (maybe gap), keep last direction or slow stop
+      walk_straight();
+    }
+  }
+  
+
+
+  readIR();
 
   while (!isWhite(ir.cl) && !isWhite(ir.cr)) {
     readIR();
@@ -289,7 +301,7 @@ void beep(int count) {
 
 void display_ir() {
 
-
+  readUltrasonic();
   readIR();
   tft.setColor(White);
   tft.print(String("Distance:"), 0, 0);
