@@ -12,12 +12,12 @@ UTFT tft(ST7735, 6, 7, 3, 4, 5);
 #define inC 12
 #define inD 13
 
-#define walk_speed 100
-#define tilt_speed 80
-#define turn_speed 80
-#define walk_speed_enB 160
-#define tilt_speed_enB 140
-#define turn_speed_enB 140
+#define walk_speed 140
+#define tilt_speed 120
+#define turn_speed 100
+#define walk_speed_enB 170
+#define tilt_speed_enB 150
+#define turn_speed_enB 130
 #define threshold 400
 
 #define btnPin 0
@@ -79,28 +79,42 @@ void setup() {
   //
   readUltrasonic();
   readIR();
-  // display_ir();
   delay(1500);
+  beep(1);
+  follow_line_full();
+  turn_right();
+  follow_line_full();
+  follow_line_full();
+  follow_line_full();
+  turn_left();
+  follow_line_full();
+  follow_line_full();
+  turn_right();
+  follow_line_full();
+  turn_left();
+  follow_line_full();
+  follow_line_full();
+  turn_right();
+  follow_line_full();
+
+  delay(3000);
   beep(2);
+  uturn();
+  follow_line_full();
+  turn_right();
+  follow_line_full();
+  follow_line_full();
+  turn_left();
   follow_line_full();
   follow_line_full();
   follow_line_full();
-  // turn_right();
-  // follow_line_full();
-  // follow_line_full();
-  // follow_line_full();
-  // turn_left();
-  // follow_line_full();
-  // follow_line_full();
-  // turn_right();
-  // follow_line_full();
-  // turn_left();
-  // follow_line_full();
-  // follow_line_full();
-  // turn_right();
-  // follow_line_full();
-  beep(2);
-  
+  turn_right();
+  follow_line_full();
+  follow_line_full();
+  follow_line_full();
+  turn_left();
+  follow_line_full();
+  beep(3);
 
   readIR();
 }
@@ -110,7 +124,7 @@ void loop() {
 
   // readUltrasonic();
   // readIR();
-  // // display_ir();
+  // display_ir();
 
 
   // follow_line_full();
@@ -158,7 +172,7 @@ void follow_line() {
   }
   readIR();
   walk_straight();
-  delay(200);
+  delay(150);
   readIR();
   stop(500);
   readIR();
@@ -167,7 +181,7 @@ void follow_line() {
 void follow_line_full() {
   follow_line();
   readIR();
-  beep(1);
+  beep(0);
   stop(700);
   readIR();
 }
@@ -221,7 +235,7 @@ void turn_left() {
 
   readIR();
   walk_straight();
-  delay(400);
+  delay(200);
   readIR();
   stop(500);
 
@@ -236,7 +250,7 @@ void turn_left() {
     digitalWrite(inC, HIGH);
     digitalWrite(inD, LOW);
   }
-  while (isWhite(ir.cl) || isWhite(ir.cr)) {
+  while (isWhite(ir.cr) || isWhite(ir.cl)) {
     readIR();
     //tilt left untill all black
     analogWrite(enA, turn_speed);
@@ -247,7 +261,7 @@ void turn_left() {
     digitalWrite(inC, HIGH);
     digitalWrite(inD, LOW);
   }
-  
+
   readIR();
 }
 
@@ -255,7 +269,7 @@ void turn_right() {
 
   readIR();
   walk_straight();
-  delay(400);
+  delay(200);
   stop(500);
 
   readIR();
@@ -282,7 +296,69 @@ void turn_right() {
     digitalWrite(inC, LOW);
     digitalWrite(inD, HIGH);
   }
-  
+
+  readIR();
+}
+
+void uturn() {
+
+  readIR();
+  walk_straight();
+  delay(100);
+  readIR();
+  stop(500);
+
+  while (!isWhite(ir.cl) || !isWhite(ir.cr)) {
+    readIR();
+    //tilt left untill all white
+    analogWrite(enA, turn_speed);
+    digitalWrite(inA, LOW);
+    digitalWrite(inB, HIGH);
+
+    analogWrite(enB, turn_speed_enB);
+    digitalWrite(inC, HIGH);
+    digitalWrite(inD, LOW);
+  }
+  while (isWhite(ir.cr) || isWhite(ir.cl)) {
+    readIR();
+    //tilt left untill all black
+    analogWrite(enA, turn_speed);
+    digitalWrite(inA, LOW);
+    digitalWrite(inB, HIGH);
+
+    analogWrite(enB, turn_speed_enB);
+    digitalWrite(inC, HIGH);
+    digitalWrite(inD, LOW);
+  }
+
+  stop(500);
+  walk_straight();
+  delay(200);
+
+  while (!isWhite(ir.cl) || !isWhite(ir.cr)) {
+    readIR();
+    //tilt left untill all white
+    analogWrite(enA, turn_speed);
+    digitalWrite(inA, LOW);
+    digitalWrite(inB, HIGH);
+
+    analogWrite(enB, turn_speed_enB);
+    digitalWrite(inC, HIGH);
+    digitalWrite(inD, LOW);
+  }
+  while (isWhite(ir.cr) || isWhite(ir.cl)) {
+    readIR();
+    //tilt left untill all black
+    analogWrite(enA, turn_speed);
+    digitalWrite(inA, LOW);
+    digitalWrite(inB, HIGH);
+
+    analogWrite(enB, turn_speed_enB);
+    digitalWrite(inC, HIGH);
+    digitalWrite(inD, LOW);
+  }
+  stop(500);
+
   readIR();
 }
 
