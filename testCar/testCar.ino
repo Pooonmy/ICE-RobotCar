@@ -12,12 +12,12 @@ UTFT tft(ST7735, 6, 7, 3, 4, 5);
 #define inC 12
 #define inD 13
 
-#define walk_speed 110
-#define tilt_speed 80
-#define turn_speed 80
-#define walk_speed_enB 180
-#define tilt_speed_enB 160
-#define turn_speed_enB 130
+#define walk_speed 130
+#define tilt_speed 120
+#define turn_speed 120
+#define walk_speed_enB 205
+#define tilt_speed_enB 185
+#define turn_speed_enB 150
 #define threshold 800
 #define block 25
 
@@ -79,20 +79,20 @@ void setup() {
   tft.clrScr();
   // tft.print("Running :3", CENTER, 56);
 
-  // //
+  
   readUltrasonic();
   readIR();
   delay(1000);
   beep(1);
 
   home_to_check();
+  delay(3000);
   beep(2);
   check_to_home();
-
-
+  
   beep(3);
-
   readIR();
+
 }
 
 void loop() {
@@ -113,7 +113,7 @@ void loop() {
 
 
 void home_to_check() {
-  delay(100);
+  delay(200);
   readUltrasonic();
   if (detect_box_front()) {
     turn_right();
@@ -142,12 +142,14 @@ void home_to_check() {
     turn_right();
     follow_line_full();
     turn_left();
-    straight(200);
+    straight(1500);
+    readIR();
+    
   } else {
     follow_line_full();
     turn_left();
     follow_line_full();
-    straight(200);
+    straight(1500);
   }
 }
 
@@ -174,7 +176,7 @@ void check_to_home() {
   follow_line_full();
   follow_line_full();
   follow_line_full();
-  turn_left();
+  turn_right();
   follow_line_full();
   follow_line_full();
   delay(100);
@@ -184,10 +186,12 @@ void check_to_home() {
     follow_line_full();
     turn_right();
     follow_line_full();
+    turn_right();
   } else {
     follow_line_full();
     turn_left();
     follow_line_full();
+    uturn();
   }
 }
 
@@ -265,6 +269,7 @@ void safe_move_forward() {
 }
 
 void straight(unsigned long time) {
+  timestamp = millis();
   while (millis() - timestamp < time) {
       readIR();
       if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
@@ -275,6 +280,7 @@ void straight(unsigned long time) {
         tilt_right();
       }
     }
+    stop(0);
 }
 
 
@@ -295,7 +301,7 @@ void follow_line() {
   readIR();
   timestamp = millis();
 
-  while (millis() - timestamp < 300) {
+  while (millis() - timestamp < 200) {
     readIR();
     if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
       walk_straight();
