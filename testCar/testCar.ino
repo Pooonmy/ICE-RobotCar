@@ -113,57 +113,82 @@ void loop() {
 
 
 void home_to_check() {
+  delay(100);
+  readUltrasonic();
   if (detect_box_front()) {
     turn_right();
-    safe_move_forward();
+    follow_line_full();
     turn_left();
-    safe_move_forward();
+    follow_line_full();
     turn_right();
   } else {
-    safe_move_forward();
+    follow_line_full();
     turn_right();
-    safe_move_forward();
+    follow_line_full();
   }
-  safe_move_forward();
-  safe_move_forward();
+  follow_line_full();
+  follow_line_full();
   turn_left();
-  safe_move_forward();
-  safe_move_forward();
-  safe_move_forward();
+  follow_line_full();
+  follow_line_full();
+  follow_line_full();
   turn_right();
-  safe_move_forward();
+  follow_line_full();
+  delay(100);
+  readUltrasonic();
   if (detect_box_front()) {
     turn_left();
-    safe_move_forward();
+    follow_line_full();
     turn_right();
-    safe_move_forward();
-  } else {
-    safe_move_forward();
+    follow_line_full();
     turn_left();
-    safe_move_forward();
+    straight(200);
+  } else {
+    follow_line_full();
+    turn_left();
+    follow_line_full();
+    straight(200);
   }
 }
 
 void check_to_home() {
   uturn();
+  back_ward();
+  delay(100);
+  readUltrasonic();
   if (detect_box_front()) {
     turn_right();
-    safe_move_forward();
+    follow_line_full();
+    turn_left();
+    follow_line_full();
+    turn_right();
+    follow_line_full();
+    turn_left();
+  } else {
+    follow_line_full();
+    turn_right();
+    follow_line_full();
+    follow_line_full();
+    turn_left();
   }
   follow_line_full();
-  safe_turn_right();
   follow_line_full();
   follow_line_full();
-  safe_turn_left();
+  turn_left();
   follow_line_full();
   follow_line_full();
-  follow_line_full();
-  safe_turn_right();
-  follow_line_full();
-  follow_line_full();
-  follow_line_full();
-  safe_turn_left();
-  follow_line_full();
+  delay(100);
+  readUltrasonic();
+  if (detect_box_front()) {
+    turn_left();
+    follow_line_full();
+    turn_right();
+    follow_line_full();
+  } else {
+    follow_line_full();
+    turn_left();
+    follow_line_full();
+  }
 }
 
 
@@ -239,6 +264,19 @@ void safe_move_forward() {
   } else follow_line_full();
 }
 
+void straight(unsigned long time) {
+  while (millis() - timestamp < time) {
+      readIR();
+      if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
+        walk_straight();
+      } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
+        tilt_left();
+      } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
+        tilt_right();
+      }
+    }
+}
+
 
 void follow_line() {
   while (isWhite(ir.rr) && isWhite(ir.ll)) {
@@ -271,6 +309,37 @@ void follow_line() {
   readIR();
   stop(500);
   readIR();
+}
+
+void back_ward() {
+  while (millis() - timestamp < 200) {
+    readIR();
+    if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
+      analogWrite(enA, walk_speed);
+      digitalWrite(inA, LOW);
+      digitalWrite(inB, HIGH);
+
+      analogWrite(enB, walk_speed_enB);
+      digitalWrite(inC, LOW);
+      digitalWrite(inD, HIGH);
+    } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
+      analogWrite(enA, 0);
+      digitalWrite(inA, LOW);
+      digitalWrite(inB, LOW);
+
+      analogWrite(enB, tilt_speed_enB);
+      digitalWrite(inC, LOW);
+      digitalWrite(inD, HIGH);
+    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
+      analogWrite(enA, tilt_speed);
+      digitalWrite(inA, LOW);
+      digitalWrite(inB, HIGH);
+
+      analogWrite(enB, 0);
+      digitalWrite(inC, LOW);
+      digitalWrite(inD, LOW);
+    }
+  }
 }
 
 void follow_line_full() {
