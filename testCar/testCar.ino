@@ -12,12 +12,12 @@ UTFT tft(ST7735, 6, 7, 3, 4, 5);
 #define inC 12
 #define inD 13
 
-#define walk_speed 140
-#define tilt_speed 120
-#define turn_speed 100
-#define walk_speed_enB 170
-#define tilt_speed_enB 150
-#define turn_speed_enB 130
+#define walk_speed 120
+#define tilt_speed 100
+#define turn_speed 90
+#define walk_speed_enB 185
+#define tilt_speed_enB 165
+#define turn_speed_enB 155
 #define threshold 400
 
 #define btnPin 0
@@ -76,10 +76,10 @@ void setup() {
   tft.clrScr();
   // tft.print("Running :3", CENTER, 56);
 
-  //
+  // //
   readUltrasonic();
   readIR();
-  delay(1500);
+  delay(1000);
   beep(1);
   follow_line_full();
   turn_right();
