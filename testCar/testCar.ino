@@ -12,12 +12,12 @@ UTFT tft(ST7735, 6, 7, 3, 4, 5);
 #define inC 12
 #define inD 13
 
-#define walk_speed 115
-#define tilt_speed 85
+#define walk_speed 110
+#define tilt_speed 80
 #define turn_speed 80
-#define walk_speed_enB 185
-#define tilt_speed_enB 165
-#define turn_speed_enB 135
+#define walk_speed_enB 180
+#define tilt_speed_enB 160
+#define turn_speed_enB 130
 #define threshold 800
 #define block 25
 
@@ -111,50 +111,59 @@ void loop() {
   // readIR();
 }
 
-void check_to_home() {
-  uturn();
-  follow_line_full();
-  safe_turn_right();
-  follow_line_full();
-  follow_line_full();
-  safe_turn_left();
-  follow_line_full();
-  follow_line_full();
-  follow_line_full();
-  safe_turn_right();
-  follow_line_full();
-  follow_line_full();
-  follow_line_full();
-  safe_turn_left();
-  follow_line_full();
-}
 
 void home_to_check() {
-  if(detect_box_front()) {
-    safe_turn_right();
+  if (detect_box_front()) {
+    turn_right();
     safe_move_forward();
-    safe_turn_left();
+    turn_left();
+    safe_move_forward();
+    turn_right();
+  } else {
+    safe_move_forward();
+    turn_right();
     safe_move_forward();
   }
-  else
-  {
+  safe_move_forward();
+  safe_move_forward();
+  turn_left();
+  safe_move_forward();
+  safe_move_forward();
+  safe_move_forward();
+  turn_right();
+  safe_move_forward();
+  if (detect_box_front()) {
+    turn_left();
     safe_move_forward();
-    safe_turn_right();
+    turn_right();
+    safe_move_forward();
+  } else {
+    safe_move_forward();
+    turn_left();
     safe_move_forward();
   }
-  // safe_move_forward();
-  // safe_turn_right();
-  safe_move_forward();
-  safe_move_forward();
-  safe_turn_left();
-  safe_move_forward();
-  safe_move_forward();
-  safe_move_forward();
+}
+
+void check_to_home() {
+  uturn();
+  if (detect_box_front()) {
+    turn_right();
+    safe_move_forward();
+  }
+  follow_line_full();
   safe_turn_right();
-  safe_move_forward();
-  safe_move_forward();
+  follow_line_full();
+  follow_line_full();
   safe_turn_left();
-  safe_move_forward();
+  follow_line_full();
+  follow_line_full();
+  follow_line_full();
+  safe_turn_right();
+  follow_line_full();
+  follow_line_full();
+  follow_line_full();
+  safe_turn_left();
+  follow_line_full();
 }
 
 
@@ -186,6 +195,7 @@ bool detect_box_front() {
 void safe_turn_right() {
   turn_right();
   stop(500);
+  delay(2000);
   readUltrasonic();
   if (detect_box_front()) {
     beep(1);
@@ -213,15 +223,15 @@ void safe_move_forward() {
   if (detect_box_front()) {
     beep(1);
     while (millis() - timestamp < 200) {
-    readIR();
-    if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
-      walk_straight();
-    } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
-      tilt_left();
-    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
-      tilt_right();
+      readIR();
+      if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
+        walk_straight();
+      } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
+        tilt_left();
+      } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
+        tilt_right();
+      }
     }
-  }
     turn_right();
     follow_line_full();
     turn_left();
@@ -362,6 +372,8 @@ void turn_left() {
 }
 
 void turn_right() {
+
+  timestamp = millis();
 
   readIR();
   while (millis() - timestamp < 300) {
