@@ -12,13 +12,14 @@ UTFT tft(ST7735, 6, 7, 3, 4, 5);
 #define inC 12
 #define inD 13
 
-#define walk_speed 120
-#define tilt_speed 100
-#define turn_speed 90
+#define walk_speed 115
+#define tilt_speed 85
+#define turn_speed 80
 #define walk_speed_enB 185
 #define tilt_speed_enB 165
-#define turn_speed_enB 155
-#define threshold 400
+#define turn_speed_enB 135
+#define threshold 800
+#define block 25
 
 #define btnPin 0
 #define buzzPin 19
@@ -45,6 +46,8 @@ ir_s ir;
 
 long duration;
 int distance = 0;
+
+unsigned long timestamp;
 
 int count = 1;
 
@@ -81,39 +84,12 @@ void setup() {
   readIR();
   delay(1000);
   beep(1);
-  follow_line_full();
-  turn_right();
-  follow_line_full();
-  follow_line_full();
-  follow_line_full();
-  turn_left();
-  follow_line_full();
-  follow_line_full();
-  turn_right();
-  follow_line_full();
-  turn_left();
-  follow_line_full();
-  follow_line_full();
-  turn_right();
-  follow_line_full();
 
-  delay(3000);
+  home_to_check();
   beep(2);
-  uturn();
-  follow_line_full();
-  turn_right();
-  follow_line_full();
-  follow_line_full();
-  turn_left();
-  follow_line_full();
-  follow_line_full();
-  follow_line_full();
-  turn_right();
-  follow_line_full();
-  follow_line_full();
-  follow_line_full();
-  turn_left();
-  follow_line_full();
+  check_to_home();
+
+
   beep(3);
 
   readIR();
@@ -133,6 +109,52 @@ void loop() {
   // turn_left();
 
   // readIR();
+}
+
+void check_to_home() {
+  uturn();
+  follow_line_full();
+  safe_turn_right();
+  follow_line_full();
+  follow_line_full();
+  safe_turn_left();
+  follow_line_full();
+  follow_line_full();
+  follow_line_full();
+  safe_turn_right();
+  follow_line_full();
+  follow_line_full();
+  follow_line_full();
+  safe_turn_left();
+  follow_line_full();
+}
+
+void home_to_check() {
+  if(detect_box_front()) {
+    safe_turn_right();
+    safe_move_forward();
+    safe_turn_left();
+    safe_move_forward();
+  }
+  else
+  {
+    safe_move_forward();
+    safe_turn_right();
+    safe_move_forward();
+  }
+  // safe_move_forward();
+  // safe_turn_right();
+  safe_move_forward();
+  safe_move_forward();
+  safe_turn_left();
+  safe_move_forward();
+  safe_move_forward();
+  safe_move_forward();
+  safe_turn_right();
+  safe_move_forward();
+  safe_move_forward();
+  safe_turn_left();
+  safe_move_forward();
 }
 
 
@@ -156,6 +178,58 @@ int isWhite(int read) {
   return read < threshold;
 }
 
+bool detect_box_front() {
+  readUltrasonic();
+  return (distance > 0 && distance < block);
+}
+
+void safe_turn_right() {
+  turn_right();
+  stop(500);
+  readUltrasonic();
+  if (detect_box_front()) {
+    beep(1);
+    turn_left();
+    follow_line_full();
+    turn_right();
+  } else return;
+}
+
+void safe_turn_left() {
+  turn_left();
+  stop(500);
+  readUltrasonic();
+  if (detect_box_front()) {
+    beep(1);
+    turn_right();
+    follow_line_full();
+    turn_left();
+  } else return;
+}
+
+void safe_move_forward() {
+  stop(500);
+  readUltrasonic();
+  if (detect_box_front()) {
+    beep(1);
+    while (millis() - timestamp < 200) {
+    readIR();
+    if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
+      walk_straight();
+    } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
+      tilt_left();
+    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
+      tilt_right();
+    }
+  }
+    turn_right();
+    follow_line_full();
+    turn_left();
+    follow_line_full();
+  } else follow_line_full();
+}
+
+
 void follow_line() {
   while (isWhite(ir.rr) && isWhite(ir.ll)) {
     delay(20);
@@ -171,8 +245,19 @@ void follow_line() {
     readIR();
   }
   readIR();
-  walk_straight();
-  delay(150);
+  timestamp = millis();
+
+  while (millis() - timestamp < 300) {
+    readIR();
+    if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
+      walk_straight();
+    } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
+      tilt_left();
+    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
+      tilt_right();
+    }
+  }
+  stop(0);
   readIR();
   stop(500);
   readIR();
@@ -234,8 +319,19 @@ void stop(int time) {
 void turn_left() {
 
   readIR();
-  walk_straight();
-  delay(200);
+  timestamp = millis();
+
+  while (millis() - timestamp < 300) {
+    readIR();
+    if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
+      walk_straight();
+    } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
+      tilt_left();
+    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
+      tilt_right();
+    }
+  }
+  stop(0);
   readIR();
   stop(500);
 
@@ -268,8 +364,18 @@ void turn_left() {
 void turn_right() {
 
   readIR();
-  walk_straight();
-  delay(200);
+  while (millis() - timestamp < 300) {
+    readIR();
+    if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
+      walk_straight();
+    } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
+      tilt_left();
+    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
+      tilt_right();
+    }
+  }
+  stop(0);
+
   stop(500);
 
   readIR();
@@ -303,8 +409,17 @@ void turn_right() {
 void uturn() {
 
   readIR();
-  walk_straight();
-  delay(100);
+  while (millis() - timestamp < 200) {
+    readIR();
+    if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
+      walk_straight();
+    } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
+      tilt_left();
+    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
+      tilt_right();
+    }
+  }
+  stop(0);
   readIR();
   stop(500);
 
@@ -332,8 +447,6 @@ void uturn() {
   }
 
   stop(500);
-  walk_straight();
-  delay(200);
 
   while (!isWhite(ir.cl) || !isWhite(ir.cr)) {
     readIR();
