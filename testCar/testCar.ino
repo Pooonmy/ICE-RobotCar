@@ -221,52 +221,6 @@ bool detect_box_front() {
   return (distance > 0 && distance < block);
 }
 
-void safe_turn_right() {
-  turn_right();
-  stop(500);
-  delay(2000);
-  readUltrasonic();
-  if (detect_box_front()) {
-    beep(1);
-    turn_left();
-    follow_line_full();
-    turn_right();
-  } else return;
-}
-
-void safe_turn_left() {
-  turn_left();
-  stop(500);
-  readUltrasonic();
-  if (detect_box_front()) {
-    beep(1);
-    turn_right();
-    follow_line_full();
-    turn_left();
-  } else return;
-}
-
-void safe_move_forward() {
-  stop(500);
-  readUltrasonic();
-  if (detect_box_front()) {
-    beep(1);
-    while (millis() - timestamp < 200) {
-      readIR();
-      if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
-        walk_straight();
-      } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
-        tilt_left();
-      } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
-        tilt_right();
-      }
-    }
-    turn_right();
-    follow_line_full();
-    turn_left();
-    follow_line_full();
-  } else follow_line_full();
-}
 
 void straight(unsigned long time) {
   timestamp = millis();
