@@ -12,13 +12,16 @@ UTFT tft(ST7735, 6, 7, 3, 4, 5);
 #define inC 12
 #define inD 13
 
-#define walk_speed 120
-#define tilt_speed 100
-#define turn_speed 90
-#define walk_speed_enB 185
-#define tilt_speed_enB 165
-#define turn_speed_enB 155
-#define threshold 400
+#define speed -20
+#define speed_enB -15
+#define walk_speed 150 + speed
+#define tilt_speed 140 + speed
+#define turn_speed 130 + speed
+#define walk_speed_enB 235 + speed_enB
+#define tilt_speed_enB 215 + speed_enB
+#define turn_speed_enB 200 + speed_enB
+#define threshold 800
+#define block 25
 
 #define btnPin 0
 #define buzzPin 19
@@ -46,16 +49,9 @@ ir_s ir;
 long duration;
 int distance = 0;
 
-int count = 1;
+unsigned long timestamp;
 
-// int map[6][6] = {
-//   { 0, 0, 0, 0, 0, 0 },
-//   { 0, 0, 0, 0, 0, 0 },
-//   { 0, 1, 0, 1, 0, 0 },
-//   { 0, 0, 0, 0, 0, 0 },
-//   { 0, 0, 0, 0, 0, 0 },
-//   { 0, 0, 0, 0, 0, 0 }
-// };
+int count = 1;
 
 void beep(int count);
 
@@ -85,55 +81,48 @@ void setup() {
   tft.clrScr();
   // tft.print("Running :3", CENTER, 56);
 
-  // //
-  // readUltrasonic();
-  // readIR();
-  // delay(1000);
-  // beep(1);
-  // follow_line_full();
-  // turn_right();
-  // follow_line_full();
-  // follow_line_full();
-  // follow_line_full();
-  // turn_left();
-  // follow_line_full();
-  // follow_line_full();
-  // turn_right();
-  // follow_line_full();
-  // turn_left();
-  // follow_line_full();
-  // follow_line_full();
-  // turn_right();
-  // follow_line_full();
+  // start here
+  readUltrasonic();
+  readIR();
+  delay(1000);
+  beep(1);
 
-  // delay(3000);
-  // beep(2);
+  // // home to checkpoint
+  home_to_check();
+  delay(3000);
+  beep(2);
+  delay(1000);
+
+  // checkpoint to home
+  check_to_home();
+  beep(3);
+
+  // end here
+
+  // below here to test movement
+
+  // follow_line_full();
   // uturn();
   // follow_line_full();
-  // turn_right();
-  // follow_line_full();
-  // follow_line_full();
+  // push1block();
+  // beep(1);
+  // delay(500);
   // turn_left();
   // follow_line_full();
-  // follow_line_full();
-  // follow_line_full();
   // turn_right();
   // follow_line_full();
-  // follow_line_full();
-  // follow_line_full();
-  // turn_left();
-  // follow_line_full();
-  // beep(3);
-
+  // turn_right();
+  // push1block();
+  // back_ward();
   // readIR();
 }
 
 void loop() {
 
 
-  readUltrasonic();
-  readIR();
-  display_ir();
+  // readUltrasonic();
+  // readIR();
+  // display_ir();
 
 
   // follow_line_full();
@@ -142,6 +131,95 @@ void loop() {
   // turn_left();
 
   // readIR();
+}
+
+
+void home_to_check() {
+  delay(200);
+  readUltrasonic();
+  if (detect_box_front()) {
+    turn_right();
+    follow_line_full();
+    turn_left();
+    follow_line_full();
+    turn_right();
+  } else {
+    follow_line_full();
+    turn_right();
+    follow_line_full();
+  }
+  follow_line_full();
+  turn_left();
+  follow_line_full();
+  push1block();
+
+  // follow_line_full();
+  // follow_line_full();
+  // follow_line_full();
+  turn_right();
+  follow_line_full();
+  follow_line_full();
+  turn_left();
+  follow_line_full();
+  turn_right();
+  stop(50);
+  delay(50);
+  readUltrasonic();
+  if (detect_box_front()) {
+    turn_left();
+    follow_line_full();
+    turn_right();
+    follow_line_full();
+    turn_left();
+    // straight(1500);
+
+  } else {
+    follow_line_full();
+    turn_left();
+    follow_line_full();
+    // straight(1500);
+  }
+}
+
+void check_to_home() {
+  uturn();
+  // back_ward(200);
+  delay(100);
+  readUltrasonic();
+  if (detect_box_front()) {
+    turn_right();
+    follow_line_full();
+    turn_left();
+    follow_line_full();
+    turn_right();
+    follow_line_full();
+    turn_left();
+  } else {
+    follow_line_full();
+    turn_right();
+    follow_line_full();
+    follow_line_full();
+    turn_left();
+  }
+  follow_line_full();
+  follow_line_full();
+  follow_line_full();
+  turn_right();
+  follow_line_full();
+  follow_line_full();
+  delay(100);
+  readUltrasonic();
+  if (detect_box_front()) {
+    turn_left();
+    follow_line_full();
+    turn_right();
+    follow_line_full();
+    turn_right();
+  } else {
+    follow_line_full();
+    turn_left();
+    follow_line_full();
+  }
 }
 
 
@@ -161,23 +239,20 @@ void log(void) {
   // Serial.println(ir.front);
 }
 
-
-
 int isWhite(int read) {
   return read < threshold;
 }
 
-bool isIntersection() {
-  return (!isWhite(ir.ll) && !isWhite(ir.rr));
+bool detect_box_front() {
+  readUltrasonic();
+  return (distance > 0 && distance < block);
 }
 
-void follow_line_until_intersection() {
-  while (1) {
+
+void straight(unsigned long time) {
+  timestamp = millis();
+  while (millis() - timestamp < time) {
     readIR();
-    if (isIntersection()) {
-      stop(200);
-      break;
-    }
     if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
       walk_straight();
     } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
@@ -186,10 +261,19 @@ void follow_line_until_intersection() {
       tilt_right();
     }
   }
+  stop(0);
 }
 
 
 void follow_line() {
+  analogWrite(enA, 200);
+  digitalWrite(inA, HIGH);
+  digitalWrite(inB, LOW);
+
+  analogWrite(enB, 255);
+  digitalWrite(inC, HIGH);
+  digitalWrite(inD, LOW);
+  delay(50);
   while (isWhite(ir.rr) && isWhite(ir.ll)) {
     delay(20);
     readIR();
@@ -204,19 +288,103 @@ void follow_line() {
     readIR();
   }
   readIR();
-  walk_straight();
-  delay(150);
+  straight(300);
+  stop(0);
   readIR();
+  stop(300);
+  readIR();
+}
+
+#define del_speed 20
+#define del_speed_enB 120
+
+void back_ward() {
+  analogWrite(enA, 200);
+  digitalWrite(inA, LOW);
+  digitalWrite(inB, HIGH);
+
+  analogWrite(enB, 255);
+  digitalWrite(inC, LOW);
+  digitalWrite(inD, HIGH);
+  delay(50);
+  while (isWhite(ir.rr) && isWhite(ir.ll)) {
+    readIR();
+
+    analogWrite(enA, walk_speed - del_speed);
+    digitalWrite(inA, LOW);
+    digitalWrite(inB, HIGH);
+
+    analogWrite(enB, walk_speed_enB - del_speed_enB);
+    digitalWrite(inC, LOW);
+    digitalWrite(inD, HIGH);
+  }
   stop(500);
-  readIR();
+  straight(500);
 }
 
 void follow_line_full() {
   follow_line();
   readIR();
   beep(0);
-  stop(700);
+  stop(400);
   readIR();
+}
+
+void push1block() {
+
+  straight(300);
+  analogWrite(enA, 200);
+  digitalWrite(inA, HIGH);
+  digitalWrite(inB, LOW);
+
+  analogWrite(enB, 255);
+  digitalWrite(inC, HIGH);
+  digitalWrite(inD, LOW);
+  delay(50);
+
+  analogWrite(enA, 200);
+  digitalWrite(inA, HIGH);
+  digitalWrite(inB, LOW);
+
+  analogWrite(enB, 255);
+  digitalWrite(inC, HIGH);
+  digitalWrite(inD, LOW);
+  delay(0);
+
+  follow_line();
+
+  analogWrite(enA, 200);
+  digitalWrite(inA, HIGH);
+  digitalWrite(inB, LOW);
+
+  analogWrite(enB, 255);
+  digitalWrite(inC, HIGH);
+  digitalWrite(inD, LOW);
+  delay(50);
+
+  analogWrite(enA, 200);
+  digitalWrite(inA, HIGH);
+  digitalWrite(inB, LOW);
+
+  analogWrite(enB, 255);
+  digitalWrite(inC, HIGH);
+  digitalWrite(inD, LOW);
+  delay(0);
+
+  stop(200);
+
+  analogWrite(enA, 200);
+  digitalWrite(inA, HIGH);
+  digitalWrite(inB, LOW);
+
+  analogWrite(enB, 255);
+  digitalWrite(inC, HIGH);
+  digitalWrite(inD, LOW);
+  delay(200);
+
+  straight(800);
+  stop(0);
+  back_ward();
 }
 
 void tilt_left() {
@@ -267,8 +435,8 @@ void stop(int time) {
 void turn_left() {
 
   readIR();
-  walk_straight();
-  delay(200);
+  straight(0);
+  stop(0);
   readIR();
   stop(500);
 
@@ -294,15 +462,16 @@ void turn_left() {
     digitalWrite(inC, HIGH);
     digitalWrite(inD, LOW);
   }
+  stop(0);
 
   readIR();
 }
 
 void turn_right() {
 
-  readIR();
-  walk_straight();
-  delay(200);
+  straight(0);
+  stop(0);
+
   stop(500);
 
   readIR();
@@ -329,15 +498,15 @@ void turn_right() {
     digitalWrite(inC, LOW);
     digitalWrite(inD, HIGH);
   }
-
+  stop(0);
   readIR();
 }
 
 void uturn() {
 
   readIR();
-  walk_straight();
-  delay(100);
+  straight(500);
+  stop(0);
   readIR();
   stop(500);
 
@@ -365,8 +534,8 @@ void uturn() {
   }
 
   stop(500);
-  walk_straight();
-  delay(200);
+  straight(500);
+  stop(300);
 
   while (!isWhite(ir.cl) || !isWhite(ir.cr)) {
     readIR();
