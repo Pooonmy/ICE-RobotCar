@@ -12,13 +12,14 @@ UTFT tft(ST7735, 6, 7, 3, 4, 5);
 #define inC 12
 #define inD 13
 
-#define walk_speed 150
-#define tilt_speed 140
-#define turn_speed 130
-#define walk_speed_enB 235
-#define tilt_speed_enB 215
-#define turn_speed_enB 200
-#define add_push_speed 30
+#define speed 20
+#define speed_enB 20
+#define walk_speed 150 + speed
+#define tilt_speed 140 + speed
+#define turn_speed 130 + speed
+#define walk_speed_enB 235 + speed_enB
+#define tilt_speed_enB 215 + speed_enB
+#define turn_speed_enB 200 + speed_enB
 #define threshold 800
 #define block 25
 
@@ -80,19 +81,40 @@ void setup() {
   tft.clrScr();
   // tft.print("Running :3", CENTER, 56);
 
-
+  // start here
   readUltrasonic();
   readIR();
   delay(1000);
   beep(1);
 
+  // // home to checkpoint
   home_to_check();
   delay(3000);
   beep(2);
-  check_to_home();
+  delay(1000);
 
+  // checkpoint to home
+  check_to_home();
   beep(3);
-  readIR();
+
+  // end here
+
+  // below here to test movement
+
+  // follow_line_full();
+  // uturn();
+  // follow_line_full();
+  // push1block();
+  // beep(1);
+  // delay(500);
+  // turn_left();
+  // follow_line_full();
+  // turn_right();
+  // follow_line_full();
+  // turn_right();
+  // push1block();
+  // back_ward();
+  // readIR();
 }
 
 void loop() {
@@ -143,7 +165,6 @@ void home_to_check() {
     follow_line_full();
     turn_left();
     // straight(1500);
-    readIR();
 
   } else {
     follow_line_full();
@@ -191,7 +212,6 @@ void check_to_home() {
     follow_line_full();
     turn_left();
     follow_line_full();
-    uturn();
   }
 }
 
@@ -264,84 +284,100 @@ void follow_line() {
   straight(300);
   stop(0);
   readIR();
-  stop(500);
+  stop(300);
   readIR();
 }
 
-void back_ward(unsigned long time) {
-  timestamp = millis();
-  while (millis() - timestamp < time) {
+#define del_speed 20
+#define del_speed_enB 120
+
+void back_ward() {
+  analogWrite(enA, 200);
+  digitalWrite(inA, LOW);
+  digitalWrite(inB, HIGH);
+
+  analogWrite(enB, 255);
+  digitalWrite(inC, LOW);
+  digitalWrite(inD, HIGH);
+  delay(50);
+  while (isWhite(ir.rr) && isWhite(ir.ll)) {
     readIR();
-    if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
-      analogWrite(enA, walk_speed);
-      digitalWrite(inA, LOW);
-      digitalWrite(inB, HIGH);
 
-      analogWrite(enB, walk_speed_enB);
-      digitalWrite(inC, LOW);
-      digitalWrite(inD, HIGH);
-    } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
-      analogWrite(enA, 0);
-      digitalWrite(inA, LOW);
-      digitalWrite(inB, LOW);
+    analogWrite(enA, walk_speed - del_speed);
+    digitalWrite(inA, LOW);
+    digitalWrite(inB, HIGH);
 
-      analogWrite(enB, tilt_speed_enB);
-      digitalWrite(inC, LOW);
-      digitalWrite(inD, HIGH);
-    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
-      analogWrite(enA, tilt_speed);
-      digitalWrite(inA, LOW);
-      digitalWrite(inB, HIGH);
-
-      analogWrite(enB, 0);
-      digitalWrite(inC, LOW);
-      digitalWrite(inD, LOW);
-    }
+    analogWrite(enB, walk_speed_enB - del_speed_enB);
+    digitalWrite(inC, LOW);
+    digitalWrite(inD, HIGH);
   }
+  stop(500);
+  straight(500);
 }
 
 void follow_line_full() {
   follow_line();
   readIR();
   beep(0);
-  stop(700);
+  stop(400);
   readIR();
 }
 
 void push1block() {
 
-  while (isWhite(ir.rr) && isWhite(ir.ll)) {
-    delay(20);
-    readIR();
+  straight(300);
+  analogWrite(enA, 200);
+  digitalWrite(inA, HIGH);
+  digitalWrite(inB, LOW);
 
-    if (!isWhite(ir.cr) && !isWhite(ir.cl)) {
-      analogWrite(enA, walk_speed + add_push_speed);
-      digitalWrite(inA, HIGH);
-      digitalWrite(inB, LOW);
+  analogWrite(enB, 255);
+  digitalWrite(inC, HIGH);
+  digitalWrite(inD, LOW);
+  delay(50);
 
-      analogWrite(enB, walk_speed_enB + add_push_speed);
-      digitalWrite(inC, HIGH);
-      digitalWrite(inD, LOW);
-    } else if (!isWhite(ir.cl) && isWhite(ir.cr)) {
-      analogWrite(enA, 0);
-      digitalWrite(inA, LOW);
-      digitalWrite(inB, LOW);
+  analogWrite(enA, 200);
+  digitalWrite(inA, HIGH);
+  digitalWrite(inB, LOW);
 
-      analogWrite(enB, tilt_speed_enB + add_push_speed);
-      digitalWrite(inC, HIGH);
-      digitalWrite(inD, LOW);
-    } else if (!isWhite(ir.cr) && isWhite(ir.cl)) {
-      analogWrite(enA, tilt_speed + add_push_speed);
-      digitalWrite(inA, HIGH);
-      digitalWrite(inB, LOW);
+  analogWrite(enB, 255);
+  digitalWrite(inC, HIGH);
+  digitalWrite(inD, LOW);
+  delay(150);
 
-      analogWrite(enB, 0);
-      digitalWrite(inC, LOW);
-      digitalWrite(inD, LOW);
-    }
-    readIR();
-  }
+  follow_line();
+
+  analogWrite(enA, 200);
+  digitalWrite(inA, HIGH);
+  digitalWrite(inB, LOW);
+
+  analogWrite(enB, 255);
+  digitalWrite(inC, HIGH);
+  digitalWrite(inD, LOW);
+  delay(50);
+
+  analogWrite(enA, 200);
+  digitalWrite(inA, HIGH);
+  digitalWrite(inB, LOW);
+
+  analogWrite(enB, 255);
+  digitalWrite(inC, HIGH);
+  digitalWrite(inD, LOW);
+  delay(200);
+
+  stop(200);
+
+  analogWrite(enA, 200);
+  digitalWrite(inA, HIGH);
+  digitalWrite(inB, LOW);
+
+  analogWrite(enB, 255);
+  digitalWrite(inC, HIGH);
+  digitalWrite(inD, LOW);
+  delay(200);
+
+  straight(800);
   stop(0);
+  back_ward();
 }
 
 void tilt_left() {
@@ -461,7 +497,7 @@ void turn_right() {
 void uturn() {
 
   readIR();
-  straight(200);
+  straight(300);
   stop(0);
   readIR();
   stop(500);
@@ -490,6 +526,8 @@ void uturn() {
   }
 
   stop(500);
+  straight(500);
+  stop(300);
 
   while (!isWhite(ir.cl) || !isWhite(ir.cr)) {
     readIR();
