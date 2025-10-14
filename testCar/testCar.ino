@@ -12,8 +12,8 @@ UTFT tft(ST7735, 6, 7, 3, 4, 5);
 #define inC 12
 #define inD 13
 
-#define speed 20
-#define speed_enB 20
+#define speed -20
+#define speed_enB -10
 #define walk_speed 150 + speed
 #define tilt_speed 140 + speed
 #define turn_speed 130 + speed
@@ -87,7 +87,7 @@ void setup() {
   delay(1000);
   beep(1);
 
-  // // home to checkpoint
+  // home to checkpoint
   home_to_check();
   delay(3000);
   beep(2);
@@ -95,15 +95,11 @@ void setup() {
 
   // checkpoint to home
   check_to_home();
+  delay(1000);
   beep(3);
 
   // end here
 
-  // below here to test movement
-
-  // follow_line_full();
-  // uturn();
-  // follow_line_full();
   // push1block();
   // beep(1);
   // delay(500);
@@ -113,8 +109,6 @@ void setup() {
   // follow_line_full();
   // turn_right();
   // push1block();
-  // back_ward();
-  // readIR();
 }
 
 void loop() {
@@ -123,12 +117,6 @@ void loop() {
   // readUltrasonic();
   // readIR();
   // display_ir();
-
-
-  // follow_line_full();
-  // turn_right();
-  // follow_line_full();
-  // turn_left();
 
   // readIR();
 }
@@ -149,14 +137,17 @@ void home_to_check() {
     follow_line_full();
   }
   follow_line_full();
+  turn_left();
+  follow_line_full();
+  push1block();
+  turn_right();
+  follow_line_full();
   follow_line_full();
   turn_left();
   follow_line_full();
-  follow_line_full();
-  follow_line_full();
   turn_right();
-  follow_line_full();
-  delay(100);
+  stop(50);
+  delay(50);
   readUltrasonic();
   if (detect_box_front()) {
     turn_left();
@@ -164,20 +155,21 @@ void home_to_check() {
     turn_right();
     follow_line_full();
     turn_left();
-    // straight(1500);
+    stop(0);
 
   } else {
     follow_line_full();
     turn_left();
     follow_line_full();
-    // straight(1500);
   }
 }
-
 void check_to_home() {
   uturn();
-  // back_ward(200);
+  stop(100);
+  straight(100);
+  stop(0);
   delay(100);
+  readUltrasonic();
   readUltrasonic();
   if (detect_box_front()) {
     turn_right();
@@ -208,13 +200,13 @@ void check_to_home() {
     turn_right();
     follow_line_full();
     turn_right();
+    stop(0);
   } else {
     follow_line_full();
     turn_left();
     follow_line_full();
   }
 }
-
 
 
 void log(void) {
@@ -259,7 +251,7 @@ void straight(unsigned long time) {
 
 
 void follow_line() {
-  analogWrite(enA, 200);
+  analogWrite(enA, 180);
   digitalWrite(inA, HIGH);
   digitalWrite(inB, LOW);
 
@@ -292,7 +284,7 @@ void follow_line() {
 #define del_speed_enB 120
 
 void back_ward() {
-  analogWrite(enA, 200);
+  analogWrite(enA, 180);
   digitalWrite(inA, LOW);
   digitalWrite(inB, HIGH);
 
@@ -326,7 +318,7 @@ void follow_line_full() {
 void push1block() {
 
   straight(300);
-  analogWrite(enA, 200);
+  analogWrite(enA, 180);
   digitalWrite(inA, HIGH);
   digitalWrite(inB, LOW);
 
@@ -335,18 +327,18 @@ void push1block() {
   digitalWrite(inD, LOW);
   delay(50);
 
-  analogWrite(enA, 200);
+  analogWrite(enA, 180);
   digitalWrite(inA, HIGH);
   digitalWrite(inB, LOW);
 
   analogWrite(enB, 255);
   digitalWrite(inC, HIGH);
   digitalWrite(inD, LOW);
-  delay(150);
+  delay(0);
 
   follow_line();
 
-  analogWrite(enA, 200);
+  analogWrite(enA, 180);
   digitalWrite(inA, HIGH);
   digitalWrite(inB, LOW);
 
@@ -355,27 +347,27 @@ void push1block() {
   digitalWrite(inD, LOW);
   delay(50);
 
-  analogWrite(enA, 200);
+  analogWrite(enA, 180);
   digitalWrite(inA, HIGH);
   digitalWrite(inB, LOW);
 
   analogWrite(enB, 255);
   digitalWrite(inC, HIGH);
   digitalWrite(inD, LOW);
-  delay(200);
+  delay(0);
 
   stop(200);
 
-  analogWrite(enA, 200);
+  analogWrite(enA, 180);
   digitalWrite(inA, HIGH);
   digitalWrite(inB, LOW);
 
   analogWrite(enB, 255);
   digitalWrite(inC, HIGH);
   digitalWrite(inD, LOW);
-  delay(200);
+  delay(100);
 
-  straight(800);
+  straight(500);
   stop(0);
   back_ward();
 }
@@ -526,7 +518,7 @@ void uturn() {
   }
 
   stop(500);
-  straight(500);
+  straight(400);
   stop(300);
 
   while (!isWhite(ir.cl) || !isWhite(ir.cr)) {
