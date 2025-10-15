@@ -558,7 +558,6 @@ void read_ir_sensors() {
   for (int i = 0; i < NUM_IR; i++) {
     ir_values[i] = analogRead(IR_PINS[i]);
   }
-  // With 4 sensors the expected order in IR_PINS is:
   // [0]=right_far, [1]=right_center, [2]=left_center, [3]=left_far
   ir.right_far = analogRead(IR_PINS[0]);
   ir.right_center = analogRead(IR_PINS[1]);
