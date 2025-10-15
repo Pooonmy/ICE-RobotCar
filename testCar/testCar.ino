@@ -79,7 +79,7 @@ void setup() {
 
   beep(0);
   tft.clrScr();
-  tft.print("Running :3", CENTER, 56);
+  // tft.print("Running :3", CENTER, 56);
 
   // start here
   readUltrasonic();
