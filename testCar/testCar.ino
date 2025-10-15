@@ -13,7 +13,7 @@ UTFT tft(ST7735, 6, 7, 3, 4, 5);
 #define inD 13
 
 #define speed -20
-#define speed_enB -10
+#define speed_enB -0
 #define walk_speed 150 + speed
 #define tilt_speed 140 + speed
 #define turn_speed 130 + speed
@@ -166,13 +166,15 @@ void home_to_check() {
 void check_to_home() {
   uturn();
   stop(100);
-  straight(100);
-  stop(0);
+  straight(300);
+  stop(500);
   delay(100);
   readUltrasonic();
   readUltrasonic();
   if (detect_box_front()) {
     turn_right();
+    stop(0);
+    delay(200);
     follow_line_full();
     turn_left();
     follow_line_full();
@@ -251,7 +253,7 @@ void straight(unsigned long time) {
 
 
 void follow_line() {
-  analogWrite(enA, 180);
+  analogWrite(enA, 200);
   digitalWrite(inA, HIGH);
   digitalWrite(inB, LOW);
 
@@ -284,7 +286,7 @@ void follow_line() {
 #define del_speed_enB 120
 
 void back_ward() {
-  analogWrite(enA, 180);
+  analogWrite(enA, 200);
   digitalWrite(inA, LOW);
   digitalWrite(inB, HIGH);
 
@@ -318,7 +320,7 @@ void follow_line_full() {
 void push1block() {
 
   straight(300);
-  analogWrite(enA, 180);
+  analogWrite(enA, 200);
   digitalWrite(inA, HIGH);
   digitalWrite(inB, LOW);
 
@@ -327,18 +329,18 @@ void push1block() {
   digitalWrite(inD, LOW);
   delay(50);
 
-  analogWrite(enA, 180);
+  analogWrite(enA, 200);
   digitalWrite(inA, HIGH);
   digitalWrite(inB, LOW);
 
   analogWrite(enB, 255);
   digitalWrite(inC, HIGH);
   digitalWrite(inD, LOW);
-  delay(0);
+  delay(150);
 
   follow_line();
 
-  analogWrite(enA, 180);
+  analogWrite(enA, 200);
   digitalWrite(inA, HIGH);
   digitalWrite(inB, LOW);
 
@@ -347,7 +349,7 @@ void push1block() {
   digitalWrite(inD, LOW);
   delay(50);
 
-  analogWrite(enA, 180);
+  analogWrite(enA, 200);
   digitalWrite(inA, HIGH);
   digitalWrite(inB, LOW);
 
@@ -358,14 +360,14 @@ void push1block() {
 
   stop(200);
 
-  analogWrite(enA, 180);
+  analogWrite(enA, 200);
   digitalWrite(inA, HIGH);
   digitalWrite(inB, LOW);
 
   analogWrite(enB, 255);
   digitalWrite(inC, HIGH);
   digitalWrite(inD, LOW);
-  delay(100);
+  delay(200);
 
   straight(500);
   stop(0);
